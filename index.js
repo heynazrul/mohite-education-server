@@ -24,13 +24,32 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+    const usersCollection = client.db('mohiteEduDB').collection('users');
     const courseCollection = client.db('mohiteEduDB').collection('course');
+
 
     app.get('/course', async (req, res) => {
       const result = await courseCollection.find().toArray();
       res.send(result);
     });
 
+    // users related API
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: 'user exists in user Database' });
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log('Pinged your deployment. You successfully connected to MongoDB!');
